@@ -14,15 +14,8 @@ class Problem:
     """The class for a formal problem."""
 
     def __init__(self, initial, cars_per_action):
-        """The constructor specifies the initial state, and possibly a goal
-        state, if there is a unique goal. Your subclass's constructor can add
-        other arguments.
-
-        Vars:
-            initial: the initial state
-            cars_per_action: aka number of attendants, or maximum number
-                of cars that can move on each step.
-        """
+        self.initial = initial
+        self.attendants = cars_per_action
         
 
     def actions(self, state):
@@ -41,7 +34,9 @@ class Problem:
         is a legal action
         So, you must return a *list* of actions, where each action
         is a *set* of car/action pairs. 
-        """ 
+        """
+        
+        
 
     def result(self, state, action):
         """Return the state that results from executing the given
