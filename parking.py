@@ -16,7 +16,7 @@ class Problem:
     def __init__(self, initial, cars_per_action):
         self.initial = initial
         self.attendants = cars_per_action
-        self.ketamine = 0
+        
         
     def check_valid(self, state, move):
         carLocs = list(zip(range(state.n), state.cars))
@@ -107,7 +107,6 @@ class Problem:
         action in the given state. The action must be one of
         self.actions(state)."""
         carLocs = list(zip(range(state.n), state.cars))
-        print(action, state.cars)
         for singleMove in action:
             pos = list(carLocs[singleMove[0]][1])
             if singleMove[1] == 'up':
