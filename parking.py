@@ -17,6 +17,42 @@ class Problem:
         self.initial = initial
         self.attendants = cars_per_action
         
+    def check_valid(self, state, move):
+        carLocs = list(zip(range(state.n), state.cars))
+
+        # positions will hold a list of updated positions, and posSet will hold a set.
+        # this is for comparisons later. If positions and posSet have different lengths,
+        # it means that at least 2 of the cars were moved into each other.
+        positions = list()
+        posSet = set()
+        for singleMove in move:
+            # won't check if it stays still. also avoids crashing into self.
+            if singleMove[1] == 'stay':
+                continue
+            # singleMove is the tuple (n, type).
+            pos = list(carLocs[singleMove[0]][1])
+            positions.append(carLocs[singleMove[0]][1])
+            posSet.add(carLocs[singleMove[0]][1])
+            # could use a switch or enumeration, maybe? Not skilled enough with python for that.
+            if singleMove[1] == 'up':
+                pos[0] -= 1
+            if singleMove[1] == 'left':
+                pos[1] -= 1
+            if singleMove[1] == 'right':
+                pos[1] += 1
+            if singleMove[1] == 'down':
+                pos[0] -= 1
+            # reconvert to tuple... because you can't "assign values" to a tuple or something.
+            pos = tuple(pos)
+            # if position contains a -1, it returns false.
+            if -1 in pos:
+                return False
+            # if position is in another car or a barrier, returns false.
+            if pos in state.cars or pos in state.barriers:
+                return False
+        if (len(positions) != len(posSet)):
+            return False
+        return True
 
     def actions(self, state):
         """Return the actions that can be executed in the given
@@ -35,7 +71,7 @@ class Problem:
         So, you must return a *list* of actions, where each action
         is a *set* of car/action pairs. 
         """
-        
+
         # all five possible moves
         moves = ["stay", "left", "right", "up", "down"]
         
@@ -51,7 +87,11 @@ class Problem:
 
         # zips potMoves into a single SET that contains n tuples with format (car, move)
         for i in potMoves:
-            allMoves.append(set(zip(i[0], i[1])))
+            holder = set(zip(i[0], i[1]))
+            # now I want to trim excess - if it will bring the car out of bounds, or into a barrier, it doesn't add the move.
+            #if (self.check_valid(state, holder)):
+            allMoves.append(holder)
+        self.check_valid(state, {(0, 'right'), (1, 'stay')})
         return allMoves        
         
         
@@ -60,6 +100,19 @@ class Problem:
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
+        carLocs = list(zip(range(state.n), state.cars))
+        for singleMove in action:
+            pos = list(carLocs[singleMove[0]][1])
+            if singleMove[1] == 'up':
+                pos[0] -= 1
+            if singleMove[1] == 'left':
+                pos[1] -= 1
+            if singleMove[1] == 'right':
+                pos[1] += 1
+            if singleMove[1] == 'down':
+                pos[0] -= 1
+            state.cars[singleMove[0]] = tuple(pos)
+        return state
 
 
 
