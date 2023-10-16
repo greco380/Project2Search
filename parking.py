@@ -13,10 +13,10 @@ import time
 class Problem:
     """The class for a formal problem."""
 
-
     def __init__(self, initial, cars_per_action):
         self.initial = initial
         self.attendants = cars_per_action
+        self.ketamine = 0
         
     def check_valid(self, state, move):
         carLocs = list(zip(range(state.n), state.cars))
@@ -26,9 +26,11 @@ class Problem:
         # it means that at least 2 of the cars were moved into each other.
         positions = list()
         posSet = set()
+        stays = 0
         for singleMove in move:
             # won't check if it stays still. also avoids crashing into self.
             if singleMove[1] == 'stay':
+                stays += 1
                 continue
             # singleMove is the tuple (n, type).
             pos = list(carLocs[singleMove[0]][1])
@@ -42,15 +44,19 @@ class Problem:
             if singleMove[1] == 'right':
                 pos[1] += 1
             if singleMove[1] == 'down':
-                pos[0] -= 1
+                pos[0] += 1
             # reconvert to tuple... because you can't "assign values" to a tuple or something.
             pos = tuple(pos)
-            # if position contains a -1, it returns false.
+            # if position is below 0, it returns false.
             if pos[0] < 0 or pos[1] < 0:
+                return False
+            if pos[0] >= state.n or pos[1] >= state.n:
                 return False
             # if position is in another car or a barrier, returns false.
             if pos in state.cars or pos in state.barriers:
                 return False
+        if stays == self.attendants:
+            return False
         if (len(positions) != len(posSet)):
             return False
         return True
@@ -76,7 +82,7 @@ class Problem:
         # all five possible moves
         moves = ["down", "right", "left", "up", "stay"]
         
-        # every possible move with n attendants, minus all stays
+        # every possible move with n attendantss
         moven = list(itertools.product(moves, repeat = self.attendants))
         
         # every possible combination of x cars with y attendants
@@ -92,8 +98,6 @@ class Problem:
             # now I want to trim excess - if it will bring the car out of bounds, or into a barrier, it doesn't add the move.
             if (self.check_valid(state, holder)):
                 allMoves.append(holder)
-        for i in allMoves: print(i)
-        print()
         return allMoves        
         
         
@@ -103,6 +107,7 @@ class Problem:
         action in the given state. The action must be one of
         self.actions(state)."""
         carLocs = list(zip(range(state.n), state.cars))
+        print(action, state.cars)
         for singleMove in action:
             pos = list(carLocs[singleMove[0]][1])
             if singleMove[1] == 'up':
@@ -112,8 +117,9 @@ class Problem:
             if singleMove[1] == 'right':
                 pos[1] += 1
             if singleMove[1] == 'down':
-                pos[0] -= 1
+                pos[0] += 1
             state.cars[singleMove[0]] = tuple(pos)
+
         return state
 
 
@@ -446,7 +452,7 @@ parser = argparse.ArgumentParser(
     description='Solves a simultaneous parking problem'
 )
 
-parser.add_argument('-c', '--cars', default=2, help="The number of cars (and size of lot)", type=int)
+parser.add_argument('-c', '--cars', default=3, help="The number of cars (and size of lot)", type=int)
 parser.add_argument('-a', '--attendants', default=1, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
 parser.add_argument('-b', '--barriers', default=0, help="The number of attendants (number of barriers", type=int)
 parser.add_argument('-s', '--search', default="depth_first_tree_search", help="The search algorithm to use", type=str)
