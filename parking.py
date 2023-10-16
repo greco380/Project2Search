@@ -36,6 +36,24 @@ class Problem:
         is a *set* of car/action pairs. 
         """
         
+        # all five possible moves
+        moves = ["stay", "left", "right", "up", "down"]
+        
+        # every possible move with n attendants
+        moven = itertools.product(moves, repeat = self.attendants)
+        
+        # every possible combination of x cars with y attendants
+        selection = itertools.combinations(range(initial.n), self.attendants)
+
+        # creates a list of tuples of tuples (confusing!!!) where the first tuple is a list of cars, and the second is a moveset.
+        potMoves = itertools.product(list(selection), list(moven))
+        allMoves = list()
+
+        # zips potMoves into a single SET that contains n tuples with format (car, move)
+        for i in potMoves:
+            allMoves.append(set(zip(i[0], i[1])))
+        return allMoves        
+        
         
 
     def result(self, state, action):
@@ -374,7 +392,7 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument('-c', '--cars', default=3, help="The number of cars (and size of lot)", type=int)
-parser.add_argument('-a', '--attendants', default=1, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
+parser.add_argument('-a', '--attendants', default=2, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
 parser.add_argument('-b', '--barriers', default=0, help="The number of attendants (number of barriers", type=int)
 parser.add_argument('-s', '--search', default="depth_first_tree_search", help="The search algorithm to use", type=str)
 
