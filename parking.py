@@ -13,6 +13,7 @@ import time
 class Problem:
     """The class for a formal problem."""
 
+
     def __init__(self, initial, cars_per_action):
         self.initial = initial
         self.attendants = cars_per_action
@@ -45,7 +46,7 @@ class Problem:
             # reconvert to tuple... because you can't "assign values" to a tuple or something.
             pos = tuple(pos)
             # if position contains a -1, it returns false.
-            if -1 in pos:
+            if pos[0] < 0 or pos[1] < 0:
                 return False
             # if position is in another car or a barrier, returns false.
             if pos in state.cars or pos in state.barriers:
@@ -73,25 +74,26 @@ class Problem:
         """
 
         # all five possible moves
-        moves = ["stay", "left", "right", "up", "down"]
+        moves = ["down", "right", "left", "up", "stay"]
         
-        # every possible move with n attendants
-        moven = itertools.product(moves, repeat = self.attendants)
+        # every possible move with n attendants, minus all stays
+        moven = list(itertools.product(moves, repeat = self.attendants))
         
         # every possible combination of x cars with y attendants
         selection = itertools.combinations(range(initial.n), self.attendants)
 
         # creates a list of tuples of tuples (confusing!!!) where the first tuple is a list of cars, and the second is a moveset.
-        potMoves = itertools.product(list(selection), list(moven))
+        potMoves = itertools.product(list(selection), moven)
         allMoves = list()
 
         # zips potMoves into a single SET that contains n tuples with format (car, move)
         for i in potMoves:
             holder = set(zip(i[0], i[1]))
             # now I want to trim excess - if it will bring the car out of bounds, or into a barrier, it doesn't add the move.
-            #if (self.check_valid(state, holder)):
-            allMoves.append(holder)
-        self.check_valid(state, {(0, 'right'), (1, 'stay')})
+            if (self.check_valid(state, holder)):
+                allMoves.append(holder)
+        for i in allMoves: print(i)
+        print()
         return allMoves        
         
         
@@ -444,8 +446,8 @@ parser = argparse.ArgumentParser(
     description='Solves a simultaneous parking problem'
 )
 
-parser.add_argument('-c', '--cars', default=3, help="The number of cars (and size of lot)", type=int)
-parser.add_argument('-a', '--attendants', default=2, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
+parser.add_argument('-c', '--cars', default=2, help="The number of cars (and size of lot)", type=int)
+parser.add_argument('-a', '--attendants', default=1, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
 parser.add_argument('-b', '--barriers', default=0, help="The number of attendants (number of barriers", type=int)
 parser.add_argument('-s', '--search', default="depth_first_tree_search", help="The search algorithm to use", type=str)
 
