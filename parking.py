@@ -464,9 +464,9 @@ parser = argparse.ArgumentParser(
     description='Solves a simultaneous parking problem'
 )
 
-parser.add_argument('-c', '--cars', default=2, help="The number of cars (and size of lot)", type=int)
-parser.add_argument('-a', '--attendants', default=1, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
-parser.add_argument('-b', '--barriers', default=0, help="The number of attendants (number of barriers", type=int)
+parser.add_argument('-c', '--cars', default=4, help="The number of cars (and size of lot)", type=int)
+parser.add_argument('-a', '--attendants', default=2, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
+parser.add_argument('-b', '--barriers', default=2, help="The number of attendants (number of barriers", type=int)
 parser.add_argument('-s', '--search', default="best_first_graph_search", help="The search algorithm to use", type=str)
 
 args = parser.parse_args()

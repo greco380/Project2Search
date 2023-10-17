@@ -99,7 +99,6 @@ def main():
 
 	red = np.zeros((y,x,3))
 	red[:,:,0] = 1
-	plt.imsave("red.tiff", red/255)
 
 	blue = np.zeros((y, x, 3))
 	blue[:,:,2] = 1
@@ -139,7 +138,7 @@ def main():
 
 	# uncomment the lines below to view the image
 	print(evaluate(states[0]))
-	plt.imshow(states[0])
+	plt.imsave("art3.tiff", states[0])
 	plt.show() 
 
 	
