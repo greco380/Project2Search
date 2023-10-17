@@ -80,7 +80,7 @@ class Problem:
         """
 
         # all five possible moves
-        moves = ["down", "right", "left", "up", "stay"]
+        moves = ["right", "up", "left", "down", "stay"]
         
         # every possible move with n attendantss
         moven = list(itertools.product(moves, repeat = self.attendants))
@@ -98,7 +98,7 @@ class Problem:
             # now I want to trim excess - if it will bring the car out of bounds, or into a barrier, it doesn't add the move.
             if (self.check_valid(state, holder)):
                 allMoves.append(holder)
-        print(state.cars, allMoves)
+        print("moves: ", allMoves)
         return allMoves        
         
         
@@ -351,6 +351,8 @@ def depth_first_tree_search(problem):
 
     while frontier:
         node = frontier.pop()
+        for i in frontier: print(i.state.cars)
+        print()
         if problem.goal_test(node.state):
             return node
         frontier.extend(node.expand(problem))
