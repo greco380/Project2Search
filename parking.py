@@ -16,6 +16,7 @@ class Problem:
     def __init__(self, initial, cars_per_action):
         self.initial = initial
         self.attendants = cars_per_action
+        self.visited = list()
         
         
     def check_valid(self, state, move):
@@ -27,6 +28,7 @@ class Problem:
         positions = list()
         posSet = set()
         stays = 0
+        modCar = state.cars.copy()
         for singleMove in move:
             # won't check if it stays still. also avoids crashing into self.
             if singleMove[1] == 'stay':
@@ -55,6 +57,9 @@ class Problem:
             # if position is in another car or a barrier, returns false.
             if pos in state.cars or pos in state.barriers:
                 return False
+            modCar[singleMove[0]] = pos
+        if modCar in self.visited:
+            return False
         if stays == self.attendants:
             return False
         if (len(positions) != len(posSet)):
@@ -119,6 +124,7 @@ class Problem:
                 pos[0] += 1
             carMod = state.cars.copy()
             carMod[singleMove[0]] = tuple(pos)
+            self.visited.append(carMod)
         return State(carMod, state.barriers)
 
 
@@ -349,7 +355,7 @@ def depth_first_tree_search(problem):
     frontier = [Node(problem.initial)]  # Stack
 
     while frontier:
-        node = frontier.pop(0)
+        node = frontier.pop()
         if problem.goal_test(node.state):
             return node
         frontier.extend(node.expand(problem))
