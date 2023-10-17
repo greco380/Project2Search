@@ -16,28 +16,26 @@ class Problem:
     def __init__(self, initial, cars_per_action):
         self.initial = initial
         self.attendants = cars_per_action
-        self.visited = list()
+        self.visited = set()
+        self.visited.add(tuple(initial.cars))
         
         
     def check_valid(self, state, move):
         carLocs = list(zip(range(state.n), state.cars))
-
         # positions will hold a list of updated positions, and posSet will hold a set.
         # this is for comparisons later. If positions and posSet have different lengths,
         # it means that at least 2 of the cars were moved into each other.
         positions = list()
+        if all(j[1]== "stay" for j in move ):
+            return False
         posSet = set()
         stays = 0
         modCar = state.cars.copy()
         for singleMove in move:
-            # won't check if it stays still. also avoids crashing into self.
-            if singleMove[1] == 'stay':
-                stays += 1
-                continue
             # singleMove is the tuple (n, type).
-            pos = list(carLocs[singleMove[0]][1])
-            positions.append(carLocs[singleMove[0]][1])
-            posSet.add(carLocs[singleMove[0]][1])
+            pos = list(modCar[singleMove[0]])
+            positions.append(modCar[singleMove[0]])
+            posSet.add(modCar[singleMove[0]])
             # could use a switch or enumeration, maybe? Not skilled enough with python for that.
             if singleMove[1] == 'up':
                 pos[0] -= 1
@@ -55,15 +53,17 @@ class Problem:
             if pos[0] >= state.n or pos[1] >= state.n:
                 return False
             # if position is in another car or a barrier, returns false.
-            if pos in state.cars or pos in state.barriers:
+            # THIS is the problem. It doesn't differentiate between itself and other cars.
+            if ((pos in state.cars or pos in modCar) and singleMove[1] != "stay") or pos in state.barriers:
                 return False
             modCar[singleMove[0]] = pos
-        if modCar in self.visited:
+        # invalidates move if it's already been visited by the program.
+        if tuple(modCar) in self.visited:
             return False
-        if stays == self.attendants:
-            return False
+        # supposed to make sure cars don't crash.
         if (len(positions) != len(posSet)):
             return False
+        self.visited.add(tuple(modCar))
         return True
 
     def actions(self, state):
@@ -112,6 +112,7 @@ class Problem:
         action in the given state. The action must be one of
         self.actions(state)."""
         carLocs = list(zip(range(state.n), state.cars))
+        carMod = state.cars.copy()
         for singleMove in action:
             pos = list(carLocs[singleMove[0]][1])
             if singleMove[1] == 'up':
@@ -122,9 +123,7 @@ class Problem:
                 pos[1] += 1
             if singleMove[1] == 'down':
                 pos[0] += 1
-            carMod = state.cars.copy()
             carMod[singleMove[0]] = tuple(pos)
-            self.visited.append(carMod)
         return State(carMod, state.barriers)
 
 
@@ -149,14 +148,23 @@ class Problem:
         return c + 1
 
     def value(self, state):
-        """Use this for the estimated value of the node.
-
-        It is not necessary to implement this, but you can if you like.
-        """
-        raise NotImplementedError
-
+        silt =[]
+        for j in range(state.n): silt.append((state.n - 1, state.n- 1 - j))
+        sum = 0
+        for k in range(0, state.n):
+            sum += abs(state.cars[k][0] - silt[k][0])
+            sum += abs(state.cars[k][1] - silt[k][1])
+        return sum
+    
 def heuristic_dist(node):
-    raise NotImplementedError
+    state = node.state
+    silt =[]
+    for j in range(state.n): silt.append((state.n - 1, state.n- 1 - j))
+    sum = 0
+    for k in range(0, state.n):
+        sum += abs(state.cars[k][0] - silt[k][0])
+        sum += abs(state.cars[k][1] - silt[k][1])
+    return sum
 # ___________________________________________________________________
 # You should not modify anything below the line (except for test
 # purposes, in which case you should repair it to the original state
@@ -459,7 +467,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-c', '--cars', default=2, help="The number of cars (and size of lot)", type=int)
 parser.add_argument('-a', '--attendants', default=1, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
 parser.add_argument('-b', '--barriers', default=0, help="The number of attendants (number of barriers", type=int)
-parser.add_argument('-s', '--search', default="depth_first_tree_search", help="The search algorithm to use", type=str)
+parser.add_argument('-s', '--search', default="best_first_graph_search", help="The search algorithm to use", type=str)
 
 args = parser.parse_args()
 
@@ -479,5 +487,3 @@ goal = search_dict[args.search](p)
 end_time = time.time()
 print(goal.solution())
 print(f"elapsed time: {end_time-start_time} seconds")
-
-
