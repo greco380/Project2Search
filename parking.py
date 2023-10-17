@@ -98,6 +98,7 @@ class Problem:
             # now I want to trim excess - if it will bring the car out of bounds, or into a barrier, it doesn't add the move.
             if (self.check_valid(state, holder)):
                 allMoves.append(holder)
+        print(state.cars, allMoves)
         return allMoves        
         
         
@@ -118,7 +119,7 @@ class Problem:
             if singleMove[1] == 'down':
                 pos[0] += 1
             state.cars[singleMove[0]] = tuple(pos)
-
+        state.cars_inv = {j:i for i, j in zip(range(state.n), state.cars)}
         return state
 
 
@@ -224,7 +225,6 @@ class Node:
 
     def expand(self, problem):
         """List the nodes reachable in one step from this node."""
-        problem.actions(self.state)
         return [self.child_node(problem, action)
                 for action in problem.actions(self.state)]
 
@@ -451,7 +451,7 @@ parser = argparse.ArgumentParser(
     description='Solves a simultaneous parking problem'
 )
 
-parser.add_argument('-c', '--cars', default=3, help="The number of cars (and size of lot)", type=int)
+parser.add_argument('-c', '--cars', default=2, help="The number of cars (and size of lot)", type=int)
 parser.add_argument('-a', '--attendants', default=1, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
 parser.add_argument('-b', '--barriers', default=0, help="The number of attendants (number of barriers", type=int)
 parser.add_argument('-s', '--search', default="depth_first_tree_search", help="The search algorithm to use", type=str)
