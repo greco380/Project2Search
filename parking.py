@@ -118,9 +118,9 @@ class Problem:
                 pos[1] += 1
             if singleMove[1] == 'down':
                 pos[0] += 1
-            state.cars[singleMove[0]] = tuple(pos)
-        state.cars_inv = {j:i for i, j in zip(range(state.n), state.cars)}
-        return state
+            carMod = state.cars.copy()
+            carMod[singleMove[0]] = tuple(pos)
+        return State(carMod, state.barriers)
 
 
 
@@ -351,8 +351,6 @@ def depth_first_tree_search(problem):
 
     while frontier:
         node = frontier.pop()
-        for i in frontier: print(i.state.cars)
-        print()
         if problem.goal_test(node.state):
             return node
         frontier.extend(node.expand(problem))
