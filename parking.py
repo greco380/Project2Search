@@ -164,6 +164,16 @@ def heuristic_dist(node):
     for k in range(0, state.n):
         sum += abs(state.cars[k][0] - silt[k][0])
         sum += abs(state.cars[k][1] - silt[k][1])
+        # I don't know if this actually helps efficiency, or if it even works. All I know is
+        # that, in theory, it should punish the ai for being ABOVE their dest with a barrier in the way.
+        # this way, it shouldn't stay still if there's a free attendant, a barrier below it, and the
+        # destination below it.
+        # running on the same barrier array, it saves .007 seconds on a 3n 1b 2a model.
+        # on a 4n 2b 2a model, it saved .93 seconds (20% faster), so I'm keeping it.
+        if (state.cars[k][1] == silt[k][1]):
+            for y in range(state.cars[k][0], silt[k][1]):
+                if (state.cars[k][1], y) in state.barriers:
+                    sum += 2
     return sum
 # ___________________________________________________________________
 # You should not modify anything below the line (except for test
