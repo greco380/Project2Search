@@ -64,6 +64,26 @@ class Problem:
         So, you must return a *list* of actions, where each action
         is a *set* of car/action pairs. 
         """ 
+        # all five possible moves
+        moves = ["down", "right", "left", "up", "stay"]
+        
+        # every possible move with n attendantss
+        moven = list(itertools.product(moves, repeat = self.attendants))
+        
+        # every possible combination of x cars with y attendants
+        selection = itertools.combinations(range(initial.n), self.attendants)
+
+        # creates a list of tuples of tuples (confusing!!!) where the first tuple is a list of cars, and the second is a moveset.
+        potMoves = itertools.product(list(selection), moven)
+        allMoves = list()
+
+        # zips potMoves into a single SET that contains n tuples with format (car, move)
+        for i in potMoves:
+            holder = set(zip(i[0], i[1]))
+            # now I want to trim excess - if it will bring the car out of bounds, or into a barrier, it doesn't add the move.
+            if (self.check_valid(state, holder)):
+                allMoves.append(holder)
+        return allMoves        
 
     def result(self, state, action):
         """Return the state that results from executing the given
