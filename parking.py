@@ -108,7 +108,9 @@ class Problem:
         """Return the state that results from executing the given
         action in the given state. The action must be one of
         self.actions(state)."""
-
+        carLocs = list(zip(range(state.n), state.cars))
+        carMod = state.cars.copy()
+        # todo: update content of carMod with respect to action, return a new State based on carMod.
 
 
     def goal_test(self, state):
