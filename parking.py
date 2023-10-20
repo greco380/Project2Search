@@ -27,25 +27,44 @@ class Problem:
         """
         self.cars = cars
         self.barriers = barriers
-
-
-        self.grid = [[' ' for _ in range(self.cars)] for _ in range(self.cars)]
-
-        # Place n vehicles on the top row
-        for i in range(self.cars):
-            self.cars[0][i] = f'Car {i}'
-
-        # Place barriers randomly
-        barrier_coords = [(random.randint(1, self.cars - 1), random.randint(0, self.cars - 1)) for _ in range(self.barriers)]
-        for x, y in barrier_coords:
-            self.grid[x][y] = 'Barrier'
-
-        for row in self.grid:
-            print(' | '.join(row))
-            print('-' * (4 * self.grid - 1))
+        self.visited.add(tuple(initial.cars))
         
 
-        
+    def check_valid(self, state, move):
+        carLocs = list(zip(range(state.n), state.cars))
+        # positions will hold a list of updated positions, and posSet will hold a set.
+        # this is for comparisons later. If positions and posSet have different lengths,
+        # it means that at least 2 of the cars were moved into each other.
+        positions = list()
+        if all(j[1]== "stay" for j in move ):
+            return False
+        posSet = set()
+        stays = 0
+        modCar = state.cars.copy()
+        for singleMove in move:
+            # singleMove is the tuple (n, type).
+            pos = list(modCar[singleMove[0]])
+            positions.append(modCar[singleMove[0]])
+            posSet.add(modCar[singleMove[0]])
+            # could use a switch or enumeration, maybe? Not skilled enough with python for that.
+            if singleMove[1] == 'up':
+                pos[0] -= 1
+            if singleMove[1] == 'left':
+                pos[1] -= 1
+            if singleMove[1] == 'right':
+                pos[1] += 1
+            if singleMove[1] == 'down':
+                pos[0] += 1
+            # reconvert to tuple... because you can't "assign values" to a tuple or something.
+            pos = tuple(pos)
+            # if position is below 0, it returns false.
+            if pos[0] < 0 or pos[1] < 0:
+                return False
+            if pos[0] >= state.n or pos[1] >= state.n:
+                return False
+            # todo - check if pos is a barrier or a car
+        # todo - check if pos contains duplicates, I.E cars drove into each other.
+        # todo - check if state has already been visited by the function.
 
     def actions(self, state):
         """Return the actions that can be executed in the given
@@ -193,7 +212,6 @@ class Node:
 
     def expand(self, problem):
         """List the nodes reachable in one step from this node."""
-        problem.actions(self.state)
         return [self.child_node(problem, action)
                 for action in problem.actions(self.state)]
 
@@ -420,10 +438,10 @@ parser = argparse.ArgumentParser(
     description='Solves a simultaneous parking problem'
 )
 
-parser.add_argument('-c', '--cars', default=3, help="The number of cars (and size of lot)", type=int)
-parser.add_argument('-a', '--attendants', default=1, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
-parser.add_argument('-b', '--barriers', default=0, help="The number of attendants (number of barriers", type=int)
-parser.add_argument('-s', '--search', default="depth_first_tree_search", help="The search algorithm to use", type=str)
+parser.add_argument('-c', '--cars', default=4, help="The number of cars (and size of lot)", type=int)
+parser.add_argument('-a', '--attendants', default=2, help="The number of attendants (number of cars that can be moved simultaneously)", type=int)
+parser.add_argument('-b', '--barriers', default=2, help="The number of attendants (number of barriers", type=int)
+parser.add_argument('-s', '--search', default="best_first_graph_search", help="The search algorithm to use", type=str)
 
 args = parser.parse_args()
 
@@ -443,5 +461,3 @@ goal = search_dict[args.search](p)
 end_time = time.time()
 print(goal.solution())
 print(f"elapsed time: {end_time-start_time} seconds")
-
-
